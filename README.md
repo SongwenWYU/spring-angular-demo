@@ -1,27 +1,67 @@
-# Angular
+# spring-angular-demo
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.4.
+基于Spring Boot构建的应用程序，前端使用Angular。详细Angular查看[文档](src/main/angular/README.md)。
 
-## Development server
+## 安装事项
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+1. 按照Angular安装说明进行安装 NodeJs、NPM。
+2. 控制台输入 `npm install -g @angular/cli` 全局安装 Angular CLI 。
+3. 目录切换到 `src/main` 执行命令 `ng new my-app`，my-app是自定义的名称，这里已经执行了该步骤，生成的目录是`src/main/angular`。
+4. 项目目录结构
 
-## Code scaffolding
+        src/main/
+        --------angular
+        --------java
+        --------resources
+        pom.xml
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+5. 由于springboot的工程中要加入静态html文件等需要放在resources下面的static目录下，然后直接通过localhost:8080/index.html即可访问static目录下的index.html文件。所以我们需要将angular的编译代码放在该static目录中。
 
-## Build
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/angular/dist</directory>
+                <targetPath>static</targetPath>
+            </resource>
+        </resources>
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
+6. 设置Maven build的时候buildAngular。
 
-## Running unit tests
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>ng</executable>
+                    <workingDirectory>src/main/angular</workingDirectory>
+                    <arguments>
+                        <argument>build</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+    然后执行`mvn clean package`后，在target/classes目录下的就会看到static目录以及angular/dist目录中的所有文件。最终生成的jar包中也会包含这些内容。
+    `mvn clean spring-boot:run`即可启动该项目，并且会加载angular的编译文件。
