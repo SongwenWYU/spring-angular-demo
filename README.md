@@ -27,7 +27,7 @@
             </resource>
         </resources>
 
-6. 设置Maven build的时候buildAngular。
+6. 设置Maven build的时候build Angular。
 
         <plugins>
             <plugin>
